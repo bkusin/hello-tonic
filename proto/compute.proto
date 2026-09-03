@@ -1,0 +1,19 @@
+syntax = "proto3";
+package compute;
+
+service WorkerPool {
+	rpc Register (Empty) returns (stream WorkPayload);
+}
+
+
+message WorkPayload {
+	string payload = 1;
+}
+
+message WorkResult {
+	uint32 result = 1;
+}
+
+message Empty {
+	
+}
