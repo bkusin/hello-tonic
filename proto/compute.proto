@@ -10,7 +10,7 @@ message WorkPayload {
 	string payload = 1;
 }
 
-message WorkResult {
+message WorkResponse {
 	uint32 result = 1;
 }
 

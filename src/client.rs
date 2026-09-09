@@ -1,19 +1,17 @@
-use hello_world::greeter_client::GreeterClient;
-use hello_world::HelloRequest;
+use compute::worker_pool_client::WorkerPoolClient;
+use compute::Empty;
 
-pub mod hello_world {
+pub mod compute {
     tonic::include_proto!("compute");
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut client = GreeterClient::connect("http://[::1]:3000").await?;
+    let mut client = WorkerPoolClient::connect("http://[::1]:3000").await?;
 
-    let request = tonic::Request::new(HelloRequest {
-        name: "Tonic".into(),
-    });
+    let request = tonic::Request::new(Empty {} );
 
-    let response = client.say_hello(request).await?;
+    let response = client.register(request).await?;
 
     println!("RESPONSE={:?}", response);
 
