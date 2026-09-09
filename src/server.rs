@@ -49,6 +49,8 @@ impl WorkerPool for WorkerPoolManager {
 
         let output_stream = UnboundedReceiverStream::new(rx);
 
+        // TODO: Error handling if this stream is dropped
+
         Ok(Response::new(output_stream)) 
     }
 }
