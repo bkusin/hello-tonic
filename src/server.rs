@@ -26,12 +26,30 @@ pub struct WorkerPoolManager {
 
 
 impl WorkerPoolManager {
-     async fn assign_work(&self, payload: &str) {
-        todo!("not implemented. Divide the work among the clients")
+     fn assign_work(&self, payload: &str) {
+     //   todo!("not implemented. Divide the work among the clients")
 
         /*
             in this example, the order of results received is not meaningful so just accumlate them as soon as we get them
          */
+
+        let cloned_clients = Arc::clone(&self.clients);
+        let payload = Arc::<str>::from(payload);
+
+        tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+                {
+                    let lock = cloned_clients.read().await;
+                    for sender in lock.values() {
+                        if sender.send(Ok(WorkPayload{payload: payload.to_string()})).is_err() {
+                        // TODO if send result is an error, drop the client from the map (will need write lock)
+                        println!("Can't send task to client");
+                        }
+                    }
+                }
+            }
+        });
     }
 }
 
@@ -51,6 +69,8 @@ impl WorkerPool for WorkerPoolManager {
 
         // TODO: Error handling if this stream is dropped
 
+        println!("Registered client {}", id);
+
         Ok(Response::new(output_stream)) 
     }
 }
@@ -59,6 +79,7 @@ impl WorkerPool for WorkerPoolManager {
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:3000".parse()?;
     let manager = WorkerPoolManager::default();
+    manager.assign_work("This is a test!");
 
     Server::builder()
         .add_service(WorkerPoolServer::new(manager))

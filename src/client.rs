@@ -11,9 +11,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let request = tonic::Request::new(Empty {} );
 
-    let response = client.register(request).await?;
+    let mut stream = client.register(request).await?.into_inner();
 
-    println!("RESPONSE={:?}", response);
+    println!("RESPONSE={:?}", stream);
+
+    // process work
+    loop {
+        while let Some(msg) = stream.message().await? {
+            println!("{}", msg.payload);
+        }
+    }
 
     Ok(())
 }
